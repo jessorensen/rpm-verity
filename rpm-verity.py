@@ -108,8 +108,8 @@ def build_specfile(packagename, version, release, datafilelist, sigfilelist):
 def generate_signatures(filenames, filemodes, datapath, veritypath):
     sigfilelist = []
     datafilelist = []
-    os.system("mkdir -p {}".format(veritypath+args.verity_prefix))
 
+    os.makedirs(veritypath+args.verity_prefix)
     # Maybe allow for a filter to only touch files with executable bits set
     for fn, fm in zip(filenames, filemodes):
         if S_ISREG(fm):
@@ -117,8 +117,8 @@ def generate_signatures(filenames, filemodes, datapath, veritypath):
             datafilelist += [datafile]
             (filepath, filename) = os.path.split(datafile)
             sigpath = args.verity_prefix+filepath
-            if not os.path.exists(sigpath):
-                os.system("mkdir -p {}".format(veritypath+sigpath))
+            if not os.path.exists(veritypath+sigpath):
+                os.makedirs(veritypath+sigpath)
             sigfile = args.verity_prefix+datafile+".sig"
             sigfilelist += [sigfile]
             if args.verbose:
@@ -156,7 +156,7 @@ datapath = args.path+"/data"
 veritypath = args.path+"/verity"
 
 # Because CentOS 7 ships an ancient version of cpio
-os.system("mkdir -p {}".format(datapath))
+os.makedirs(datapath)
 if args.verbose:
     print("cd {} ; rpm2cpio {} | cpio -id".format(datapath, args.rpm))
 os.system("cd {} ; rpm2cpio {} | cpio -id".format(datapath, args.rpm))
