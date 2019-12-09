@@ -112,15 +112,17 @@ def build_specfile(packagename, version, release, datafilelist, sigfilelist):
     specfd.close()
     return specfn
 
-def generate_signatures(filenames, filemodes, datapath, veritypath):
+def generate_signatures(filenames, filemodes, fileflags, datapath, veritypath):
     sigfilelist = []
     datafilelist = []
     quiet = "> /dev/null"
 
     os.makedirs(veritypath+args.verity_prefix)
-    # Maybe allow for a filter to only touch files with executable bits set
-    for fn, fm in zip(filenames, filemodes):
-        if S_ISREG(fm):
+    for fn, fm, ff in zip(filenames, filemodes, fileflags):
+        # Only parse regular files (no directories, symlinks, etc),
+        # skip files marked as config and doc files in the RPM
+        if (S_ISREG(fm) and not (ff & rpm.RPMFILE_CONFIG) and not
+            (ff & rpm.RPMFILE_DOC)):
             datafile = fn.decode("utf-8")
             datafilelist += [datafile]
             (filepath, filename) = os.path.split(datafile)
@@ -159,6 +161,7 @@ print("Processing RPM: {}-{}-{}".format(packagename, version, release))
 
 filenames=hdr['filenames']
 filemodes=hdr['filemodes']
+fileflags=hdr['fileflags']
 md5sums=hdr['filemd5s']
 datapath = args.path+"/data"
 veritypath = args.path+"/verity"
@@ -169,7 +172,7 @@ if args.verbose:
     print("cd {} ; rpm2cpio {} | cpio -id".format(datapath, args.rpm))
 os.system("cd {} ; rpm2cpio {} | cpio -id".format(datapath, args.rpm))
 
-sigfilelist, datafilelist = generate_signatures(filenames, filemodes,
+sigfilelist, datafilelist = generate_signatures(filenames, filemodes, fileflags,
                                                 datapath, veritypath)
 
 specfn = build_specfile(packagename, version, release, datafilelist,
