@@ -174,5 +174,5 @@ if args.verbose:
     print(buildcmd)
 os.system(buildcmd)
 
-os.system("rm {}".format(specfn))
-os.system("rmdir {}".format(args.path))
+os.remove(specfn)
+os.rmdir(args.path)
