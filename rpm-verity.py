@@ -80,6 +80,7 @@ License:	None
 Verity signatures
 
 %files
+%defattr(444, root, root, 755)
 """
 
 def build_specfile(packagename, version, release, datafilelist, sigfilelist):
