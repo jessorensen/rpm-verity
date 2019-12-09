@@ -7,11 +7,11 @@
 #
 import os
 import sys
+import stat
 import rpm
-from argparse import ArgumentParser
-from stat import *
+import argparse
 
-parser = ArgumentParser()
+parser = argparse.ArgumentParser()
 
 parser.add_argument(
     "-r", "--rpm",
@@ -121,7 +121,7 @@ def generate_signatures(filenames, filemodes, fileflags, datapath, veritypath):
     for fn, fm, ff in zip(filenames, filemodes, fileflags):
         # Only parse regular files (no directories, symlinks, etc),
         # skip files marked as config and doc files in the RPM
-        if (S_ISREG(fm) and not (ff & rpm.RPMFILE_CONFIG) and not
+        if (stat.S_ISREG(fm) and not (ff & rpm.RPMFILE_CONFIG) and not
             (ff & rpm.RPMFILE_DOC)):
             datafile = fn.decode("utf-8")
             datafilelist += [datafile]
