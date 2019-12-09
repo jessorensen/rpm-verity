@@ -67,6 +67,13 @@ parser.add_argument(
     default=False,
     action="store_true"
 )
+parser.add_argument(
+    "-vs", "--verbose-spec",
+    help="dump generated .spec to stdout during build",
+    required=False,
+    default=False,
+    action="store_true"
+)
 
 spectemplate="""
 Name:		{}
@@ -97,7 +104,7 @@ def build_specfile(packagename, version, release, datafilelist, sigfilelist):
         specfile += "fsverity enable --signature={} {}".format(sf, df)
         specfile += '\n'
 
-    if (args.verbose):
+    if (args.verbose_spec):
         print(specfile)
     specfn = args.path+"/verity.spec"
     specfd = open(specfn, "w")
@@ -108,6 +115,7 @@ def build_specfile(packagename, version, release, datafilelist, sigfilelist):
 def generate_signatures(filenames, filemodes, datapath, veritypath):
     sigfilelist = []
     datafilelist = []
+    quiet = "> /dev/null"
 
     os.makedirs(veritypath+args.verity_prefix)
     # Maybe allow for a filter to only touch files with executable bits set
@@ -126,9 +134,10 @@ def generate_signatures(filenames, filemodes, datapath, veritypath):
                 print("{} sign {} {} --key={} --cert={}"
                       .format(args.fsverity, datapath+datafile,
                               veritypath+sigfile, args.key, args.cert))
-            os.system("{} sign {} {} --key={} --cert={}"
+                quiet = ""
+            os.system("{} sign {} {} --key={} --cert={} {}"
                       .format(args.fsverity, datapath+datafile,
-                              veritypath+sigfile, args.key, args.cert))
+                              veritypath+sigfile, args.key, args.cert, quiet))
 
     return sigfilelist, datafilelist
 
@@ -146,8 +155,7 @@ os.close(fdno)
 packagename = hdr['name'].decode("utf-8")
 version = hdr['version'].decode("utf-8")
 release = hdr['release'].decode("utf-8")
-package = "Package: {}-{}-{}".format(packagename, version, release)
-print(package)
+print("Processing RPM: {}-{}-{}".format(packagename, version, release))
 
 filenames=hdr['filenames']
 filemodes=hdr['filemodes']
