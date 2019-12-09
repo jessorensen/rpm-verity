@@ -164,11 +164,6 @@ os.system("cd {} ; rpm2cpio {} | cpio -id".format(datapath, args.rpm))
 sigfilelist, datafilelist = generate_signatures(filenames, filemodes,
                                                 datapath, veritypath)
 
-# Remove all non directories installed from the original rpm
-#for fn, fm in zip(filenames, filemodes):
-#    if not S_ISDIR(fm):
-#        os.system("rm {}".format(datapath+fn.decode("utf-8")))
-
 specfn = build_specfile(packagename, version, release, datafilelist,
                         sigfilelist)
 os.system("rm -rf {}".format(datapath))
