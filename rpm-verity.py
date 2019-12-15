@@ -47,6 +47,13 @@ parser.add_argument(
     default="fsverity"
 )
 parser.add_argument(
+    "-i", "--ignore-rpm-signature",
+    help="ignore signatures of input rpm",
+    required=False,
+    default=False,
+    action="store_true"
+)
+parser.add_argument(
     "-B", "--rpmbuild",
     help="rpmbuild binary",
     required=False,
@@ -149,6 +156,8 @@ if args.rpm:
     print(args.rpm)
 
 ts = rpm.TransactionSet()
+if args.ignore_rpm_signature:
+    ts.setVSFlags(rpm._RPMVSF_NOSIGNATURES)
 
 fdno = os.open(args.rpm, os.O_RDONLY)
 hdr = ts.hdrFromFdno(fdno)
